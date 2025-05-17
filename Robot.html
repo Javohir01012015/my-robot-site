@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gapiruvchi Robot</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #111;
+      color: white;
+      margin: 0;
+      padding: 0;
+      text-align: center;
+    }
+
+    h1 {
+      margin-top: 20px;
+    }
+
+    #robot {
+      width: 100px;
+      height: 100px;
+      background: #0ff;
+      border-radius: 20px;
+      margin: 20px auto;
+      animation: pulse 2s infinite;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    #robot img {
+      width: 60px;
+      height: 60px;
+      animation: blink 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    video, canvas {
+      width: 90%;
+      max-width: 320px;
+      margin: 10px auto;
+      border: 2px solid #0ff;
+      border-radius: 10px;
+    }
+
+    button {
+      padding: 10px 20px;
+      margin: 10px 5px;
+      font-size: 16px;
+      background: #0ff;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #0cc;
+    }
+  </style>
+</head>
+<body>
+  <h1>🤖 Gapiruvchi Robot</h1>
+  <div id="robot">
+    <img src="https://i.postimg.cc/Jzszn1VW/image.png" alt="Robot yuz">
+  </div>
+
+  <div>
+    <button onclick="speak('Salom! Meni Javohir yaratdi!')">🗣 Gapirish</button>
+    <button onclick="capturePhoto()">📸 Suratga olish</button>
+    <button onclick="downloadPhoto()">⬇️ Yuklab olish</button>
+  </div>
+
+  <video id="video" autoplay playsinline></video>
+  <canvas id="canvas" width="320" height="240"></canvas>
+
+  <script>
+    // Robot harakati
+    const robot = document.getElementById('robot');
+    let posX = window.innerWidth / 2 - 50;
+    let posY = 200;
+
+    robot.style.position = 'absolute';
+    robot.style.left = posX + 'px';
+    robot.style.top = posY + 'px';
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight') posX += 10;
+      if (e.key === 'ArrowLeft') posX -= 10;
+      if (e.key === 'ArrowDown') posY += 10;
+      if (e.key === 'ArrowUp') posY -= 10;
+      robot.style.left = posX + 'px';
+      robot.style.top = posY + 'px';
+    });
+
+    // Gapirish (robotik effektga yaqin)
+    function speak(text) {
+      const msg = new SpeechSynthesisUtterance(text);
+      msg.pitch = 0.4; // past tovush
+      msg.rate = 0.85; // sekinroq
+      msg.volume = 1;
+      // maxsus ovoz tanlash (agar bo‘lsa)
+      const voices = speechSynthesis.getVoices();
+      const robo = voices.find(v => v.name.toLowerCase().includes("google") || v.name.toLowerCase().includes("male"));
+      if (robo) msg.voice = robo;
+      speechSynthesis.speak(msg);
+    }
+
+    // Kamera ulash
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const context = canvas.getContext('2d');
+
+    navigator.mediaDevices.getUserMedia({ video: true })
+      .then((stream) => {
+        video.srcObject = stream;
+      })
+      .catch((err) => {
+        alert('Kamera yoqilmadi: ' + err.message);
+        console.error(err);
+      });
+
+    function capturePhoto() {
+      context.drawImage(video, 0, 0, canvas.width, canvas.height);
+      speak("Surat olindi!");
+    }
+
+    function downloadPhoto() {
+      const link = document.createElement('a');
+      link.download = 'robot_surat.png';
+      link.href = canvas.toDataURL();
+      link.click();
+    }
+
+    // ovozlar kech yuklansa
+    window.speechSynthesis.onvoiceschanged = () => {};
+  </script>
+</body>
+</html>
